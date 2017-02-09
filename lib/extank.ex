@@ -49,12 +49,10 @@ defmodule Extank do
   end
 
   defp draw(frame, bitmap) do
-    IO.puts "start DRAW"
     graphics_context = :wxGraphicsContext.create(frame)
-    #:wxWindow.clearBackground(frame)
+    #:wxWindow.clearBackground(frame) # can't see tank when we do this?
     :wxGraphicsContext.drawBitmap(graphics_context, bitmap, 200, 200, 36, 38)
     # draw other stuff
     :wxGraphicsContext.destroy(graphics_context)
-    IO.puts "finish DRAW"
   end
 end
