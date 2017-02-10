@@ -19,11 +19,7 @@ defmodule Extank do
 
     canvas = setup_gl_canvas(frame, size)
 
-    # once we know how many tanks there are load images for them
-    #bitmap = :wxBitmap.new()
-    #true = :wxBitmap.loadFile(bitmap, "blue_body000.jpg", [type: :wx_const.wxBITMAP_TYPE_JPEG()])
-
-    timer = :timer.send_interval(1_000, self(), :update)
+    timer = :timer.send_interval(20, self(), :update)
 
     {frame, %{frame: frame, canvas: canvas, timer: timer}}
   end
@@ -36,7 +32,7 @@ defmodule Extank do
 
   def handle_event({:wx, _, _, _, {:wxSize, :size, {width, height}, _}}, state) do
     if width != 0 and height != 0 do
-      resize_gl_scene(width, height)
+      setup_gl_canvas(state.frame, {width, height})
     end
     {:noreply, state}
   end
@@ -63,6 +59,7 @@ defmodule Extank do
   end
 
   def terminate(_, %{canvas: canvas, timer: timer}) do
+    IO.puts "TERMINATE: CLEANUP TIME"
     :wxGLCanvas.destroy(canvas)
     :timer.cancel(timer)
     :timer.sleep(300)
@@ -88,9 +85,6 @@ defmodule Extank do
   defp setup_gl(win) do
     {w, h} = :wxWindow.getClientSize(win)
     resize_gl_scene(w, h)
-    :gl.shadeModel(:gl_const.gl_smooth)
-    :gl.clearColor(0.0, 0.0, 0.0, 0.0)
-    :gl.clearDepth(1.0)
     :gl.enable(:gl_const.gl_depth_test)
     :gl.depthFunc(:gl_const.gl_lequal)
     :gl.hint(:gl_const.gl_perspective_correction_hint, :gl_const.gl_nicest)
@@ -99,22 +93,26 @@ defmodule Extank do
 
   defp resize_gl_scene(width, height) do
     :gl.viewport(0, 0, width, height)
-    :gl.matrixMode(:gl_const.gl_projection)
-    :gl.loadIdentity()
-    :glu.perspective(45.0, width / height, 0.1, 100.0)
-    :gl.matrixMode(:gl_const.gl_modelview)
-    :gl.loadIdentity()
+    :gl.shadeModel(:gl_const.gl_smooth)
+    :gl.clearColor(0.0, 0.0, 0.0, 0.0)
+    :gl.clearDepth(1.0)
     :ok
   end
 
   defp draw() do
     :gl.clear(Bitwise.bor(:gl_const.gl_color_buffer_bit, :gl_const.gl_depth_buffer_bit))
+
+    period = 10_000
+    angle = 360.0 * rem(:erlang.system_time(:millisecond), period) / period
+
     :gl.loadIdentity()
-    :gl.translatef(-1.5, 0.0, -6.0)
-    :gl.'begin'(:gl_const.gl_triangles)
-    :gl.vertex3f(0.0, 1.0, 0.0)
-    :gl.vertex3f(-1.0, -1.0, 0.0)
-    :gl.vertex3f(1.0, -1.0, 0.0)
+    :gl.translatef(0.0, 0.0, 0.0)
+    :gl.rotatef(angle, 0.0, 0.0, 1.0)
+    :gl.'begin'(:gl_const.gl_polygon())
+    :gl.vertex3f(-0.25, 0.25, 0.0)
+    :gl.vertex3f(0.0, 0.25, 0.0)
+    :gl.vertex3f(0.0, 0.0, 0.0)
+    :gl.vertex3f(-0.25, 0.0, 0.0)
     :gl.'end'()
     :ok
   end

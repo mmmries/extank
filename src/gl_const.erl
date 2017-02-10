@@ -24,6 +24,12 @@ gl_color_buffer_bit() ->
 gl_depth_buffer_bit() ->
   ?GL_DEPTH_BUFFER_BIT.
 
+gl_line_loop() ->
+  ?GL_LINE_LOOP.
+
+gl_polygon() ->
+  ?GL_POLYGON.
+
 gl_triangles() ->
   ?GL_TRIANGLES.
 
