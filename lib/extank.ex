@@ -1,6 +1,7 @@
 defmodule Extank do
   @behaviour :wx_object
   use Bitwise
+  import :gl_const
 
   def start(_type, _args) do
     {_, _, _, pid} = :wx_object.start_link(__MODULE__, [], [name: :extank])
@@ -85,22 +86,22 @@ defmodule Extank do
   defp setup_gl(win) do
     {w, h} = :wxWindow.getClientSize(win)
     resize_gl_scene(w, h)
-    :gl.enable(:gl_const.gl_depth_test)
-    :gl.depthFunc(:gl_const.gl_lequal)
-    :gl.hint(:gl_const.gl_perspective_correction_hint, :gl_const.gl_nicest)
+    :gl.enable(gl_depth_test())
+    :gl.depthFunc(gl_lequal())
+    :gl.hint(gl_perspective_correction_hint(), gl_nicest())
     :ok
   end
 
   defp resize_gl_scene(width, height) do
     :gl.viewport(0, 0, width, height)
-    :gl.shadeModel(:gl_const.gl_smooth)
+    :gl.shadeModel(gl_smooth())
     :gl.clearColor(0.0, 0.0, 0.0, 0.0)
     :gl.clearDepth(1.0)
     :ok
   end
 
   defp draw() do
-    :gl.clear(Bitwise.bor(:gl_const.gl_color_buffer_bit, :gl_const.gl_depth_buffer_bit))
+    :gl.clear(Bitwise.bor(gl_color_buffer_bit, gl_depth_buffer_bit))
 
     period = 10_000
     angle = 360.0 * rem(:erlang.system_time(:millisecond), period) / period
@@ -108,7 +109,7 @@ defmodule Extank do
     :gl.loadIdentity()
     :gl.translatef(0.0, 0.0, 0.0)
     :gl.rotatef(angle, 0.0, 0.0, 1.0)
-    :gl.'begin'(:gl_const.gl_polygon())
+    :gl.'begin'(gl_polygon())
     :gl.vertex3f(-0.25, 0.25, 0.0)
     :gl.vertex3f(0.0, 0.25, 0.0)
     :gl.vertex3f(0.0, 0.0, 0.0)
